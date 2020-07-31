@@ -2,13 +2,26 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  Bloc.observer = SimpleBlocObserver();
   runApp(MyApp());
 }
 
-class CounterCubit extends Cubit<int> {
-  CounterCubit(int initialState) : super(initialState);
-  int updateState(int state) => state + 1;
-  void increment() => emit(updateState(state));
+class FirstCounterCubit extends Cubit<int> {
+  FirstCounterCubit(int initialState) : super(initialState);
+  int _increaseState(int state) => state + 1;
+  void increment() => emit(_increaseState(state));
+  @override
+  void onChange(Change<int> change) {
+    print(change);
+    // TODO: implement onChange
+    super.onChange(change);
+  }
+}
+
+class SecondCounterCubit extends Cubit<int> {
+  SecondCounterCubit(int initialState) : super(initialState);
+  int _decreaseState(int state) => state - 1;
+  void decrement() => emit(_decreaseState(state));
   @override
   void onChange(Change<int> change) {
     print(change);
@@ -19,6 +32,7 @@ class CounterCubit extends Cubit<int> {
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -63,8 +77,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final cubit = CounterCubit(0);
 //  int _counter = 0;
+  final cubit1 = FirstCounterCubit(0);
+  final cubit2 = SecondCounterCubit(100);
 
   void _incrementCounter() {
     setState(() {
@@ -74,7 +89,13 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
 //      _counter++;
-      cubit.increment();
+      cubit1.increment();
+    });
+  }
+
+  void _decrementCounter() {
+    setState(() {
+      cubit2.decrement();
     });
   }
 
@@ -115,19 +136,58 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(
               'You have pushed the button this many times:',
             ),
-            Text(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                Text(
 //              '$_counter',
-              '${cubit.state}',
-              style: Theme.of(context).textTheme.headline4,
+                  '${cubit1.state}',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+                Text(
+                  '${cubit2.state}',
+                  style: Theme.of(context).textTheme.headline4,
+                ),
+              ],
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Container(
+        margin: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        padding: EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            FloatingActionButton(
+              heroTag: null,
+              key: Key('fab1'),
+              onPressed: _incrementCounter,
+              tooltip: 'Decrement',
+              child: Icon(Icons.add),
+            ),
+            FloatingActionButton(
+              heroTag: null,
+              key: Key('fab2'),
+              onPressed: _decrementCounter,
+              tooltip: 'Increment',
+              child: Icon(Icons.remove),
+            ),
+          ],
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class SimpleBlocObserver extends BlocObserver {
+  // In response to all changes on all cubits, do the following
+  @override
+  void onChange(Cubit cubit, Change change) {
+    print('${cubit.runtimeType} $change');
+    // TODO: implement onChange
+    super.onChange(cubit, change);
   }
 }
