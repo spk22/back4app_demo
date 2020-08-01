@@ -21,12 +21,24 @@ class FirstCounterCubit extends Cubit<int> {
 class SecondCounterCubit extends Cubit<int> {
   SecondCounterCubit(int initialState) : super(initialState);
   int _decreaseState(int state) => state - 1;
-  void decrement() => emit(_decreaseState(state));
+  void decrement() {
+    if (state < 0)
+      addError(Exception('state gone negative error'), StackTrace.current);
+    emit(_decreaseState(state));
+  }
+
   @override
   void onChange(Change<int> change) {
     print(change);
     // TODO: implement onChange
     super.onChange(change);
+  }
+
+  @override
+  void onError(Object error, StackTrace stackTrace) {
+    print('$error, $stackTrace');
+    // TODO: implement onError
+    super.onError(error, stackTrace);
   }
 }
 
@@ -79,7 +91,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 //  int _counter = 0;
   final cubit1 = FirstCounterCubit(0);
-  final cubit2 = SecondCounterCubit(100);
+  final cubit2 = SecondCounterCubit(10);
 
   void _incrementCounter() {
     setState(() {
@@ -189,5 +201,12 @@ class SimpleBlocObserver extends BlocObserver {
     print('${cubit.runtimeType} $change');
     // TODO: implement onChange
     super.onChange(cubit, change);
+  }
+
+  @override
+  void onError(Cubit cubit, Object error, StackTrace stackTrace) {
+    print('${cubit.runtimeType}, $error, $stackTrace');
+    // TODO: implement onError
+    super.onError(cubit, error, stackTrace);
   }
 }
