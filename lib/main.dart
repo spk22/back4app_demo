@@ -12,7 +12,12 @@ class CounterBloc extends Bloc<CounterEvent, int> {
   CounterBloc(int initialState) : super(initialState);
 
   int _increaseState(int state) => state + 1;
-  int _decreaseState(int state) => state - 1;
+  int _decreaseState(int state) {
+    state -= 1;
+    if (state < 0)
+      addError(Exception('Negative State Reached'), StackTrace.current);
+    return state;
+  }
 
   @override
   Stream<int> mapEventToState(CounterEvent event) async* {
@@ -26,6 +31,20 @@ class CounterBloc extends Bloc<CounterEvent, int> {
         break;
     }
   }
+
+//  @override
+//  void onTransition(Transition<CounterEvent, int> transition) {
+//    // TODO: implement onTransition
+//    print('$transition');
+//    super.onTransition(transition);
+//  }
+
+//  @override
+//  void onError(Object error, StackTrace stackTrace) {
+//    // TODO: implement onError
+//    print('$error, $stackTrace');
+//    super.onError(error, stackTrace);
+//  }
 }
 
 //class FirstCounterCubit extends Cubit<int> {
@@ -215,11 +234,25 @@ class _MyHomePageState extends State<MyHomePage> {
 
 class SimpleBlocObserver extends BlocObserver {
   // In response to all changes on all cubits, do the following
+//  @override
+//  void onChange(Cubit cubit, Change change) {
+//    print('${cubit.runtimeType} $change');
+//    // TODO: implement onChange
+//    super.onChange(cubit, change);
+//  }
+
   @override
-  void onChange(Cubit cubit, Change change) {
-    print('${cubit.runtimeType} $change');
-    // TODO: implement onChange
-    super.onChange(cubit, change);
+  void onEvent(Bloc bloc, Object event) {
+    // TODO: implement onEvent
+    print('${bloc.runtimeType}, $event');
+    super.onEvent(bloc, event);
+  }
+
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    // TODO: implement onTransition
+    print('${bloc.runtimeType}, $transition');
+    super.onTransition(bloc, transition);
   }
 
   @override
